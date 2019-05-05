@@ -1,4 +1,4 @@
-/*  xxx2019   */
+/*  dao2019   */
 #include "mlisp.h"
 bool implication_Q(double x_Q, double y_Q);
 //________________ 

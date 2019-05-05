@@ -1,4 +1,4 @@
-/*  xxx2019   */
+/*  dao2019   */
 #include "mlisp.h"
 bool ne_Q(double x, double y);
 //________________ 
