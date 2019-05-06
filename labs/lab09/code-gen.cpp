@@ -168,6 +168,10 @@ int tCG::p26() { // PCPAR -> PCPAR $id
     return 0;
 }
 
+//../var19-206/a07
+//../tests/even-odd
+//S3->obj = S3->obj.substr(0,S3->obj.size()-1);
+
 //_____________________
 int tCG::p27() { return 0; }
 

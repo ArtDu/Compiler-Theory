@@ -9,10 +9,12 @@ double even__bits(double n)
  {
   return (n == 0 ? 1
        : remainder(n,2) == 0 ?
-                even__bits (quotient(n,2))
-       			: odd__bits(quotient(n,2))
+                            even__bits (quotient(n,2))
+       : odd__bits(quotient(n,2))
        );
  }
+
+ //claus = (BOOL E)
 
 double odd__bits(double n)
  {
@@ -30,7 +32,7 @@ double display__bin(double n)
        		: display__bin(quotient(n,2))
        );
  }
- 
+
 double report__results(double n)
  {
   display("Happy birthday to you!\n\t");

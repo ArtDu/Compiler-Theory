@@ -33,6 +33,3 @@
 (report-results (+ (* dd 1000000)
                    (* mm 10000)
                    yyyy))
-
-
- 
