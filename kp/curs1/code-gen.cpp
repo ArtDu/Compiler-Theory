@@ -81,18 +81,22 @@ int tCG::p12() { //      E -> $zero
 }
 
 int tCG::p13() { //      E -> ADD
+    S1->obj = "( " + S1->obj + " )";
     return 0;
 }
 
 int tCG::p14() { //      E -> SUB
+    S1->obj = "( " + S1->obj + " )";
     return 0;
 }
 
 int tCG::p15() { //      E -> DIV
+    S1->obj = "( " + S1->obj + " )";
     return 0;
 }
 
 int tCG::p16() { //      E -> MUL
+    S1->obj = "( " + S1->obj + " )";
     return 0;
 }
 
@@ -189,17 +193,31 @@ int tCG::p31() { //   HMUL -> HMUL E
 
 // COND = (cond CLAUS ELSE) = (CLAUS CLAUS ELSE);
 int tCG::p32() { //   COND -> HCOND ELSE )
+    if (S2->obj[S2->obj.size()-1] == ';') {
+        S2->obj = S2->obj.substr(0,S2->obj.size()-1);
+    }
+    else if (S2->obj[S2->obj.size()-1] == '\n' && S2->obj[S2->obj.size()-2] == ';') {
+        S2->obj = S2->obj.substr(0,S2->obj.size()-2);
+    }
     S1->obj = S1->obj + S2->obj + " ); ";
     return 0;
 }
 
 // COND = (cond CLAUS CLAUS) = (CLAUS CLAUS _infinity);
 int tCG::p33() { //   COND -> HCOND CLAUS )
+    if (S2->obj[S2->obj.size()-1] == ';') {
+        S2->obj = S2->obj.substr(0,S2->obj.size()-1);
+    }
+    else if (S2->obj[S2->obj.size()-1] == '\n' && S2->obj[S2->obj.size()-2] == ';') {
+        S2->obj = S2->obj.substr(0,S2->obj.size()-2);
+    }
+
     S1->obj = S1->obj + S2->obj + " _infinity); ";
     return 0;
 }
 
 int tCG::p34() { //  HCOND -> ( cond
+    if(S1)
     S1->obj = " ( ";
     return 0;
 }
@@ -211,23 +229,64 @@ int tCG::p35() { //  HCOND -> HCOND CLAUS
 
 // CLAUS = (BOOL E) = BOOL ? E :
 int tCG::p36() { //  CLAUS -> HCLAUS E )
-    S1->obj = S1->obj + S2->obj + " : ";
+
+    if (S2->obj[S2->obj.size()-1] == ';') {
+        S2->obj = S2->obj.substr(0,S2->obj.size()-1);
+    }
+    else if (S2->obj[S2->obj.size()-1] == '\n' && S2->obj[S2->obj.size()-2] == ';') {
+        S2->obj = S2->obj.substr(0,S2->obj.size()-2);
+    }
+    else if (S2->obj[S2->obj.size()-1] == ' ' && S2->obj[S2->obj.size()-2] == ';') {
+        S2->obj = S2->obj.substr(0,S2->obj.size()-2);
+    }
+
+
+    if(S1->count)
+        S1->obj += ", " + S2->obj + ") : ";
+    else
+        S1->obj += S2->obj + ") : ";
+    S1->count = 0;
+
+
     return 0;
 }
 
 int tCG::p37() { // HCLAUS -> ( BOOL
-    S1->obj = S2->obj + " ? ";
+    S1->obj = S2->obj + " ? (";
     return 0;
 }
 
 int tCG::p38() { // HCLAUS -> HCLAUS INTER
-    S1->obj += S2->obj;
+    if (S2->obj[S2->obj.size()-1] == ';') {
+        S2->obj = S2->obj.substr(0,S2->obj.size()-1);
+    }
+    else if (S2->obj[S2->obj.size()-1] == '\n' && S2->obj[S2->obj.size()-2] == ';') {
+        S2->obj = S2->obj.substr(0,S2->obj.size()-2);
+    }
+
+    if(S1->count)
+        S1->obj += ", " + S2->obj;
+    else
+        S1->obj += S2->obj;
+    S1->count++;
     return 0;
 }
 
 // ELSE = (else E) = (E)
 int tCG::p39() { //   ELSE -> HELSE E )
-    S1->obj = S1->obj + S2->obj + ")";
+    if (S2->obj[S2->obj.size()-1] == ';') {
+        S2->obj = S2->obj.substr(0,S2->obj.size()-1);
+    }
+    else if (S2->obj[S2->obj.size()-1] == '\n' && S2->obj[S2->obj.size()-2] == ';') {
+        S2->obj = S2->obj.substr(0,S2->obj.size()-2);
+    }
+
+
+    if(S1->count)
+        S1->obj += ", " + S2->obj + ")";
+    else
+        S1->obj += S2->obj + ")";
+    S1->count = 0;
     return 0;
 }
 
@@ -237,7 +296,17 @@ int tCG::p40() { //  HELSE -> ( else
 }
 
 int tCG::p41() { //  HELSE -> HELSE INTER
-    S1->obj += S2->obj;
+    if (S2->obj[S2->obj.size()-1] == ';') {
+        S2->obj = S2->obj.substr(0,S2->obj.size()-1);
+    }
+    else if (S2->obj[S2->obj.size()-1] == '\n' && S2->obj[S2->obj.size()-2] == ';') {
+        S2->obj = S2->obj.substr(0,S2->obj.size()-2);
+    }
+    if(S1->count)
+        S1->obj += ", " + S2->obj;
+    else
+        S1->obj += S2->obj;
+    S1->count++;
     return 0;
 }
 
@@ -321,6 +390,26 @@ int tCG::p56() { //    REL -> ( < E E )
 }
 
 int tCG::p57() { //    REL -> ( = E E )
+    if (S3->obj[S3->obj.size()-1] == ';') {
+        S3->obj = S3->obj.substr(0,S3->obj.size()-1);
+    }
+    else if (S3->obj[S3->obj.size()-1] == '\n' && S3->obj[S3->obj.size()-2] == ';') {
+        S3->obj = S3->obj.substr(0,S3->obj.size()-2);
+    }
+    else if (S3->obj[S3->obj.size()-1] == ' ' && S3->obj[S3->obj.size()-2] == ';') {
+        S3->obj = S3->obj.substr(0,S3->obj.size()-2);
+    }
+
+    if (S4->obj[S4->obj.size()-1] == ';') {
+        S4->obj = S4->obj.substr(0,S4->obj.size()-1);
+    }
+    else if (S4->obj[S4->obj.size()-1] == '\n' && S4->obj[S4->obj.size()-2] == ';') {
+        S4->obj = S4->obj.substr(0,S4->obj.size()-2);
+    }
+    else if (S4->obj[S4->obj.size()-1] == ' ' && S4->obj[S4->obj.size()-2] == ';') {
+        S4->obj = S4->obj.substr(0,S4->obj.size()-2);
+    }
+
     S1->obj = "( " + S3->obj + " == " + S4->obj + " )";
     return 0;
 }
@@ -355,7 +444,7 @@ int tCG::p62() { //DISPSET -> ( display STR )
     if (S3->obj[S3->obj.size()-1] == ';') {
         S3->obj = S3->obj.substr(0,S3->obj.size()-1);
     }
-    S1->obj = "\tdisplay( " + S3->obj + ");\n";
+    S1->obj = "\tdisplay( " + S3->obj + ");";
     return 0;
 }
 
@@ -373,7 +462,7 @@ int tCG::p65() { //  INTER -> DISPSET
 }
 
 int tCG::p66() { //  INTER -> E
-    S1->obj = S1->obj + ";\n";
+    S1->obj = S1->obj;
     return 0;
 }
 
