@@ -420,6 +420,15 @@ int tCG::p58() { //    STR -> $str
 }
 
 int tCG::p59() { //    SET -> ( set! $id E )
+    if (S4->obj[S4->obj.size()-1] == ';') {
+        S4->obj = S4->obj.substr(0,S4->obj.size()-1);
+    }
+    else if (S4->obj[S4->obj.size()-1] == '\n' && S4->obj[S4->obj.size()-2] == ';') {
+        S4->obj = S4->obj.substr(0,S4->obj.size()-2);
+    }
+    else if (S4->obj[S4->obj.size()-1] == ' ' && S4->obj[S4->obj.size()-2] == ';') {
+        S4->obj = S4->obj.substr(0,S4->obj.size()-2);
+    }
     S1->obj = decor(S3->name) + " = " + S4->obj + ";\n";
     return 0;
 }
@@ -537,11 +546,33 @@ int tCG::p79() { //    VAR -> ( define $id CONST )
 }
 
 int tCG::p80() { //   PROC -> HPROC LET )
+    if (S2->obj[S2->obj.size()-1] == ';') {
+        S2->obj = S2->obj.substr(0,S2->obj.size()-1);
+    }
+    else if (S2->obj[S2->obj.size()-1] == '\n' && S2->obj[S2->obj.size()-2] == ';') {
+        S2->obj = S2->obj.substr(0,S2->obj.size()-2);
+    }
+    else if (S2->obj[S2->obj.size()-1] == ' ' && S2->obj[S2->obj.size()-2] == ';') {
+        S2->obj = S2->obj.substr(0,S2->obj.size()-2);
+    }
+
+
     S1->obj = S1->obj + S2->obj + ";\n}\n";
     return 0;
 }
 
 int tCG::p81() { //   PROC -> HPROC E )
+
+    if (S2->obj[S2->obj.size()-1] == ';') {
+        S2->obj = S2->obj.substr(0,S2->obj.size()-1);
+    }
+    else if (S2->obj[S2->obj.size()-1] == '\n' && S2->obj[S2->obj.size()-2] == ';') {
+        S2->obj = S2->obj.substr(0,S2->obj.size()-2);
+    }
+    else if (S2->obj[S2->obj.size()-1] == ' ' && S2->obj[S2->obj.size()-2] == ';') {
+        S2->obj = S2->obj.substr(0,S2->obj.size()-2);
+    }
+
     S1->obj = S1->obj + "\treturn " + S2->obj + ";\n}\n";
     return 0;
 }
@@ -584,6 +615,15 @@ int tCG::p87() { //   HLET -> LETLOC )
 }
 
 int tCG::p88() { //   HLET -> HLET INTER
+    if (S2->obj[S2->obj.size()-1] == ';') {
+        S2->obj = S2->obj.substr(0,S2->obj.size()-1);
+    }
+    else if (S2->obj[S2->obj.size()-1] == '\n' && S2->obj[S2->obj.size()-2] == ';') {
+        S2->obj = S2->obj.substr(0,S2->obj.size()-2);
+    }
+    else if (S2->obj[S2->obj.size()-1] == ' ' && S2->obj[S2->obj.size()-2] == ';') {
+        S2->obj = S2->obj.substr(0,S2->obj.size()-2);
+    }
     S1->obj+=  S2->obj + ";\n";
     return 0;
 }
