@@ -30,7 +30,7 @@ void tSM::init() {
     return;
 }
 
-int tSM::p01() { //       S -> PROG
+        int tSM::p01() { //       S -> PROG
     bool error = false;
     ferror_message = "";
     string name;
