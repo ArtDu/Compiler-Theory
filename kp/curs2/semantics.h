@@ -29,7 +29,7 @@ private:
         int types;     //типы параметров
 
         //конструктор
-        tgName(int bprop = 0, int barity = 0, int btypes = 0) :
+        tgName(int bprop = 0, int barity = 0, int btypes = 96) :
                 properties(bprop),
                 arity(barity),
                 types(btypes) {}

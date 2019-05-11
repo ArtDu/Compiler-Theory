@@ -22,6 +22,8 @@ void tSM::init() {
             tgName(PROC | DEFINED | BUILT, 2);
     globals["abs"] =
             tgName(PROC | DEFINED | BUILT, 1);
+    globals["eq?"] =
+            tgName(PROC | DEFINED | BUILT, 2);
 // ...
 // только те процедуры, которые использованы
 // в СВОИХ контрольных задачах
@@ -36,40 +38,40 @@ int tSM::p01() { //       S -> PROG
     for (tGlobal::iterator it = globals.begin();
          it != globals.end();
          ++it) {
-    // Просмотреть таблицу глобальных имен
-    // и в сообщении об ошибках указать имена
-    // ВСЕХ вызванных, но не определенных процедур,
-    // а также использованных, но не определенных
-    // глобальных переменных. Сообщения отметить [!].
-    // Кроме того, ПРЕДУПРЕДИТЬ обо ВСЕХ определенных,
-    // но не использованных процедурах и переменных,
-    // за исключением встроенных. Сообщения отметить [?].
-    //   it->first   имя
-    //   it->second  учетная запись
-    // ...
-    name = it->first;
-    elem = it->second;
-    if (elem.test(USED) && !elem.test(DEFINED)) {
-        error = true;
-        if (elem.test(PROC))
-            ferror_message += "[!]Procedure application:"
-                              "  '" + name +
-                              "' was used and not defined\n";
-        else
-            ferror_message += "[!]Variable application:"
-                              "  '" + name +
-                              "' was used and not defined\n";
-    }
-    if (!elem.test(USED) && elem.test(DEFINED) && !elem.test(BUILT)) {
-        if (elem.test(PROC))
-            ferror_message += "[?]Procedure application:"
-                              "  '" + name +
-                              "' was defined and not used\n";
-        else
-            ferror_message += "[?]Variable application:"
-                              "  '" + name +
-                              "' was defined and not used\n";
-    }
+        // Просмотреть таблицу глобальных имен
+        // и в сообщении об ошибках указать имена
+        // ВСЕХ вызванных, но не определенных процедур,
+        // а также использованных, но не определенных
+        // глобальных переменных. Сообщения отметить [!].
+        // Кроме того, ПРЕДУПРЕДИТЬ обо ВСЕХ определенных,
+        // но не использованных процедурах и переменных,
+        // за исключением встроенных. Сообщения отметить [?].
+        //   it->first   имя
+        //   it->second  учетная запись
+        // ...
+        name = it->first;
+        elem = it->second;
+        if (elem.test(USED) && !elem.test(DEFINED)) {
+            error = true;
+            if (elem.test(PROC))
+                ferror_message += "[!]Procedure application:"
+                                  "  '" + name +
+                                  "' was used and not defined\n";
+            else
+                ferror_message += "[!]Variable application:"
+                                  "  '" + name +
+                                  "' was used and not defined\n";
+        }
+        if (!elem.test(USED) && elem.test(DEFINED) && !elem.test(BUILT)) {
+            if (elem.test(PROC))
+                ferror_message += "[?]Procedure application:"
+                                  "  '" + name +
+                                  "' was defined and not used\n";
+            else
+                ferror_message += "[?]Variable application:"
+                                  "  '" + name +
+                                  "' was defined and not used\n";
+        }
 
     }//for...
     if (error) return 1;
@@ -98,6 +100,7 @@ int tSM::p11() { //       E -> $id
     if (ref.test(PROC)) {//процедура
         //процедуру нельзя использовать
         //только VAR или константу или параметр
+
         ferror_message = "[!]Procedure application:"
                          "  '" + name +
                          "' is a procedure and can not be used as a variable";
@@ -133,7 +136,7 @@ int tSM::p45() { //   CPROC -> HCPROC )
     } // if scope ...
     if (scope > 0) {// внутри процедуры
         if (params.count(name)) {// имя параметра
-        //p45-2.ss
+            //p45-2.ss
             ferror_message = "[!]Procedure application:"
                              " parameter '" + name +
                              "' shadows the procedure!";
@@ -144,7 +147,7 @@ int tSM::p45() { //   CPROC -> HCPROC )
         //  найти имя в глобальной таблице
         tgName &ref = globals[name];
         if (ref.empty()) {//неизвестное имя
-        //  создать новую учетную запись
+            //  создать новую учетную запись
             ref = tgName(PROC | USED, count);
             break;
         }
@@ -213,52 +216,35 @@ int tSM::p49() { //    BOOL -> $idq
         }
     }
 
-    //найти имя в глобальной таблице
-    tgName &ref = globals[name];
-    //имя найдено
-    if (ref.test(PROC)) {//процедура
-        //процедуру нельзя использовать
-        //только VAR или константу или параметр
-        ferror_message = "[!]Procedure application:"
-                         "  '" + name +
-                         "' is a procedure and can not be used as a variable";
-        return 1;
-    }
-    if (ref.empty()) {
-        //ранее имя не встречалось
-        //отметить использование
-        ref.set(USED);
-        ref.set(VAR);
-        //процедуру нельзя использовать так
-        //только VAR
-        return 0;
-    }
-    if (!ref.test(USED))
-        //встречалось и не использовалось
-        ref.set(USED);
+    //переменую типа BOOL обьявить нельзя
+    //и как следствие использовать
+    ferror_message = "[!]BOOL var:"
+                     "  '" + name +
+                     "' boolean variable can not exist";
+    return 1;
 
-    return 0;
 }
 
 int tSM::p55() { //   CPRED -> HCPRED )
     //валидация вызова предиката
     //как для композиции в p45
+    //с дополнительным просмотром типов параметров
     string name = S1->name;
     int count = S1->count;
     int types = S1->types;
-    if (scope == 2) {// локальная область
+    if (scope > 1) {// внури тела let
         if (locals.count(name)) {// локальное имя
-            ferror_message = "[!]Procedure application:"
+            ferror_message = "[!]Predicate application:"
                              " local variable '" + name +
-                             "' shadows the procedure!";
+                             "' shadows the predicate!";
             return 1;
         } // if locals ...
     } // if scope ...
-    if (scope >= 1) {// область параметров
+    if (scope > 0) {// внутри процедуры
         if (params.count(name)) {// имя параметра
-            ferror_message = "[!]Procedure application:"
+            ferror_message = "[!]Predicate application:"
                              " parameter '" + name +
-                             "' shadows the procedure!";
+                             "' shadows the predicate!";
             return 1;
         }// if params...
     }// if scope...
@@ -273,16 +259,16 @@ int tSM::p55() { //   CPRED -> HCPRED )
 
         // имя найдено
         if (!ref.test(PROC)) {//не процедура
-            ferror_message = "[!]Procedure application:"
+            ferror_message = "[!]Predicate application:"
                              "  '" + name +
-                             "' can not be used as procedure!";
+                             "' is not a predicate!";
             return 1;
         }
 
         if (ref.arity != count) {//число аргументов
             //                не равно числу параметров
             std::ostringstream buf;
-            buf << "[!]Procedure application: '" << name << "' "
+            buf << "[!]Predicate application: '" << name << "' "
                 << (ref.test(DEFINED) ? "expects " // процедура
                     //                                      уже определена
                     // процедура еще не определена, но уже вызывалась ранее
@@ -295,23 +281,23 @@ int tSM::p55() { //   CPRED -> HCPRED )
             return 1;
         }
 
-        if(ref.types != types) {//тип ожидаемых параметров
-                                //не равен введенным
+        if (ref.types != types && ref.types != (ID | IDQ) ) {//типы ожидаемых параметров
+            //не равен введенным
             std::ostringstream buf;
-            buf << "[!]Procedure application: '" << name << "' ";
-            buf << "expects " ;
-            if((ref.types & ID) == ID) {
+            buf << "[!]Predicate application: '" << name << "' ";
+            buf << "expects ";
+            if ((ref.types & ID) == ID) {
                 buf << "id ";
             }
-            if((ref.types & IDQ) == IDQ) {
+            if ((ref.types & IDQ) == IDQ) {
                 buf << "idq";
             }
 
             buf << ", given: ";
-            if((types & ID) == ID) {
+            if ((types & ID) == ID) {
                 buf << "id ";
             }
-            if((types & IDQ) == IDQ) {
+            if ((types & IDQ) == IDQ) {
                 buf << "idq";
             }
             buf << " !";
@@ -337,6 +323,7 @@ int tSM::p56() { //  HCPRED -> ( $idq
 
 int tSM::p57() { //  HCPRED -> HCPRED ARG
     ++S1->count;
+    S1->types = S2->types;
     return 0;
 }
 
@@ -353,16 +340,21 @@ int tSM::p59() { //     ARG -> BOOL
 int tSM::p74() { //     SET -> ( set! $id E )
 
     string name = S3->name;
-    if (scope == 2) {// локальная область
-        if (params.count(name)) {
-            //okay
-            return 0;
+    if(scope == 2) {
+        if (!params.count(name) && !locals.count(name)) {
+            ferror_message = "[!]Assignment disallowed;:"
+                             "  '" + name +
+                             "' cannot set variable";
+            return 1;
         }
     }
-    if (scope >= 1) {
-        if (params.count(name)) {
-            //okay
-            return 0;
+
+    if (scope == 1) {
+        if (!params.count(name)) {
+            ferror_message = "[!]Assignment disallowed;:"
+                             "  '" + name +
+                             "' cannot set variable, missing in parameters";
+            return 1;
         }
     }
 
@@ -371,22 +363,19 @@ int tSM::p74() { //     SET -> ( set! $id E )
     //имя найдено
     if (ref.test(PROC)) {//процедура
         //процедуру нельзя использовать
-        ferror_message = "[!]Procedure application:"
+        ferror_message = "[!]Set application:"
                          "  '" + name +
                          "' is a procedure and can not be redefined";
         return 1;
     }
     if (ref.empty()) {
         //ранее имя не встречалось
-        //процедуру нельзя использовать
+        //нельзя изменить переменную, которая не существует
         ferror_message = "[!]Assignment disallowed;:"
                          "  '" + name +
                          "' cannot set variable before its definition";
         return 1;
     }
-    if (!ref.test(USED))
-        ref.set(USED);
-
 
     return 0;
 }
@@ -422,31 +411,31 @@ int tSM::p87() { //    PRED -> HPRED BOOL )
                 << ", given: " << count << " !";
             ferror_message = buf.str();
             return 1;
-        } else if(ref.types != types) {//тип ожидаемых параметров
+        } else if (ref.types != types && types != (ID | IDQ) ) {
+            //тип ожидаемых параметров
             //не равен введенным
             std::ostringstream buf;
             buf << "[!]Procedure application: '" << name << "' ";
-            buf << "expects " ;
-            if((ref.types & ID) == ID) {
+            buf << "given: ";
+            if ((ref.types & ID) == ID) {
                 buf << "id ";
             }
-            if((ref.types & IDQ) == IDQ) {
+            if ((ref.types & IDQ) == IDQ) {
                 buf << "idq";
             }
 
-            buf << ", given: ";
-            if((types & ID) == ID) {
+            buf << ", expects: ";
+            if ((types & ID) == ID) {
                 buf << "id ";
             }
-            if((types & IDQ) == IDQ) {
+            if ((types & IDQ) == IDQ) {
                 buf << "idq";
             }
             buf << " !";
 
             ferror_message = buf.str();
             return 1;
-        }
-        else {
+        } else {
             ref.set(DEFINED);
         }
     }
