@@ -3,6 +3,8 @@
 
 using namespace std;
 
+
+
 int tCG::p01() { // S -> PROG
     string header = "/*  " + lex.Authentication() + "   */\n";
     header += "#include \"mlisp.h\"\n";
@@ -577,9 +579,36 @@ int tCG::p81() { //   PROC -> HPROC E )
     return 0;
 }
 
+std::string declarationParse(std::string str) {
+    std::string ans;
+    std::istringstream iss(str);
+    std::string s;
+    iss >> s;
+    ans = s;
+    for (; iss >> s;) {
+        if (s == "double") {
+            ans += " " + s;
+            iss >> s;
+            if(s[s.size()-1] == ',') {
+                ans += " ,";
+                continue;
+            }
+            if(s[s.size()-1] == ')') {
+                ans += " )";
+                continue;
+            }
+        }
+        ans += " " + s;
+    }
+
+    return ans;
+}
+
+//../tests/golden-section
 int tCG::p82() { //  HPROC -> PCPAR )
     S1->obj += ")";
-    declarations += S1->obj + ";\n"; //!!!
+    std::string decFunc = declarationParse(S1->obj);
+    declarations += decFunc + ";\n"; //!!!
     S1->obj += " {\n  ";
     S1->count = 0;
     return 0;
@@ -600,6 +629,7 @@ int tCG::p85() { //  PCPAR -> PCPAR $id
     if (S1->count)
         S1->obj += ", ";// не первый параметр
     S1->obj += "\tdouble " + decor(S2->name);
+
     ++(S1->count);
     return 0;
 }

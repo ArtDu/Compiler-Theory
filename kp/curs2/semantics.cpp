@@ -347,6 +347,10 @@ int tSM::p74() { //     SET -> ( set! $id E )
                              "' cannot set variable";
             return 1;
         }
+        else {
+            //OK
+            return 0;
+        }
     }
 
     if (scope == 1) {
@@ -355,6 +359,10 @@ int tSM::p74() { //     SET -> ( set! $id E )
                              "  '" + name +
                              "' cannot set variable, missing in parameters";
             return 1;
+        }
+        else {
+            //OK
+            return 0;
         }
     }
 
